@@ -1,27 +1,27 @@
 from Xdnmb import Xdnmb
-from Epub import Epub
-from Epub import TXT
+import os
+# from Epub import Epub
+# from Epub import TXT
 
-x = Xdnmb(r"PHPSESSID=*****; userhash=*****")
-DID = 51340998
-fin = x.get_all(DID)
-fin["title"] = "魔王勇者二三事"#作品标题,这里是原文标题不合适所以进行修改
+if __name__=="__main__":
+    if not os.path.exists("txtoutput"):
+        os.mkdir("txtoutput")
+    x = Xdnmb(r"PHPSESSID=*****; userhash=*****") #在这里输入你的PHPSESSID 和饼干userhash
+    DID = 51340998      #在这里修改DID号码
+    fin = x.get_all(DID)
+    msg=""
+    new_title=""#在这里加入文字信息来自定义标题,不需要后缀
+    msg+=fin[0]["content"]
+    for x in fin:
+        for y in x['Replies']:
+            msg+=y["content"]
+            msg+="\n\n"
+        msg+="\n"
+    msg+=f"来自https://www.nmbxd1.com/t/{DID}\n版权归属原作者及X岛匿名版"
 
-e = Epub(fin["title"],f"https://www.nmbxd1.com/t/{DID}")
-e.plugin(x.s)
-
-e.cover(fin["content"])
-msg = fin["Replies"]
-e.add_text(f"来自https://www.nmbxd1.com/t/{DID}\n版权归属原作者及X岛匿名版","来源声明")
-for i in msg:
-    if i["img"] != "":
-        e.add_text(i["content"],i["title"],["https://image.nmb.best/image/"+i["img"]+i["ext"]])
+    if new_title=="":
+        with open("txtoutput/"+fin[0]["title"]+".txt","w",encoding="utf-8") as f:
+            f.write(msg.replace(r"<br />","").replace(r" ",""));f.close()
     else:
-        e.add_text(i["content"],i["title"])
-e.finish()
-
-t = TXT(fin["title"])
-t.add(f"来自https://www.nmbxd1.com/t/{DID}\n版权归属原作者及X岛匿名版")
-t.add(fin["content"])
-for i in fin["Replies"]:
-    t.add(i["content"])
+        with open("txtoutput/"+new_title+".txt","w",encoding="utf-8") as f:
+            f.write(msg.replace(r"<br />","").replace(r" ",""));f.close()
